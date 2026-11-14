@@ -75,7 +75,7 @@ SPECS: dict[str, tuple[frozenset[str], frozenset[str]]] = {
                                  "approved_by"}),
                       frozenset({"body", "status", "send_after", "approved_by"})),
     "chat_message":  (frozenset({"resident_id", "direction", "body", "created_at"}), frozenset({"body"})),
-    "agent_run":     (frozenset({"case_id", "status", "step_count", "checkpoint"}),
+    "agent_run":     (frozenset({"case_id", "status", "step_count", "checkpoint", "started_at"}),
                       frozenset({"status", "step_count", "checkpoint"})),
     "audit_log":     (frozenset({"actor", "action", "target", "details", "run_id"}), frozenset()),  # insert only
 }
@@ -354,3 +354,44 @@ def list_audit_logs(conn: Conn, *, run_id: uuid.UUID | None = None, actor: str |
                     newest_first: bool = True) -> list[Row]:
     return _find(conn, "audit_log", {"run_id": run_id, "actor": actor}, order="id", desc=newest_first, limit=limit,
                  extra=[("ts", ">", since)])
+
+
+# ---------------------------------------------------------------------------
+# Joined and counting queries (read-only helpers the tools need)
+# ---------------------------------------------------------------------------
+
+def list_open_fees_with_cases(conn: Conn, *, due_on_or_before: dt.date, limit: int | None = None) -> list[Row]:
+    """Unpaid fees (due or overdue) with their case, if one exists. Oldest due date first."""
+    q = """SELECT f.id AS fee_id, f.amount, f.due_date, f.status AS fee_status,
+                   c.id AS case_id, c.ladder_step, c.status AS case_status, c.promise_date
+            FROM fee_charge f LEFT JOIN case_file c ON c.fee_charge_id = f.id
+            WHERE f.status IN ('due', 'overdue') AND f.due_date <= %s
+            ORDER BY f.due_date, f.id"""
+    params: list[Any] = [due_on_or_before]
+    if limit is not None:
+        q += " LIMIT %s"
+        params.append(int(limit))
+    return conn.execute(q, params).fetchall()
+
+
+def get_case_resident(conn: Conn, case_id: uuid.UUID) -> Row | None:
+    """The resident a case is about (case -> fee -> resident)."""
+    return conn.execute(
+        """SELECT r.* FROM case_file c JOIN fee_charge f ON f.id = c.fee_charge_id
+           JOIN resident r ON r.id = f.resident_id WHERE c.id = %s""", (case_id,)).fetchone()
+
+
+def list_open_drafts(conn: Conn, case_id: uuid.UUID) -> list[Row]:
+    """Drafts that are still in flight: pending, approved or held (not yet sent or rejected)."""
+    return conn.execute(
+        "SELECT * FROM message_draft WHERE case_id = %s AND status IN ('pending', 'approved', 'held') ORDER BY send_after",
+        (case_id,)).fetchall()
+
+
+def count_resident_drafts_between(conn: Conn, resident_id: uuid.UUID, start: dt.datetime, end: dt.datetime) -> int:
+    """Drafts scheduled in [start, end) for any of a resident's cases, excluding rejected ones."""
+    return conn.execute(
+        """SELECT count(*) AS n FROM message_draft d JOIN case_file c ON c.id = d.case_id
+           JOIN fee_charge f ON f.id = c.fee_charge_id
+           WHERE f.resident_id = %s AND d.status <> 'rejected' AND d.send_after >= %s AND d.send_after < %s""",
+        (resident_id, start, end)).fetchone()["n"]

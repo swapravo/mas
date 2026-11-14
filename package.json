@@ -1,0 +1,9 @@
+{
+  "name": "mas-web",
+  "private": true,
+  "scripts": {
+    "build": "esbuild web/src/main.ts --bundle --target=es2020 --outfile=web/static/main.js",
+    "typecheck": "tsc --noEmit -p web"
+  },
+  "devDependencies": { "esbuild": "^0.25.0", "typescript": "^5.6.0" }
+}

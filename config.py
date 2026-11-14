@@ -34,3 +34,11 @@ DATABASE_URLS = {
     "app":   os.environ.get("DATABASE_URL_APP",   "postgresql://mas_app:mas_app_pw@localhost:5432/mas"),
     "agent": os.environ.get("DATABASE_URL_AGENT", "postgresql://mas_agent:mas_agent_pw@localhost:5432/mas"),
 }
+
+# --- Business rules (enforced by tools.py, mirrored in the prompt) ------------
+TIMEZONE = "Asia/Kolkata"
+QUIET_HOURS = (21, 9)          # no messages from 21:00 until 09:00; drafts made then are held
+DAILY_CAP = 2                  # max messages per resident per day
+MAX_PROMISE_DAYS = 60          # a promised date further out than this is refused
+MAX_MESSAGE_CHARS = 400
+HISTORY_MAX = 20               # most chat messages get_chat_history returns

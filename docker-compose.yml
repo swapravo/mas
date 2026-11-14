@@ -1,0 +1,17 @@
+services:
+  postgres:
+    image: postgres:18
+    environment:
+      POSTGRES_USER: mas_owner
+      POSTGRES_PASSWORD: mas_owner_pw
+      POSTGRES_DB: mas
+    ports: ["127.0.0.1:5432:5432"]
+    volumes:
+      - ./schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro   # applied once, on first start
+      - pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mas_owner -d mas"]
+      interval: 3s
+      retries: 20
+volumes:
+  pgdata:

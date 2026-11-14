@@ -11,12 +11,13 @@ import threading
 import uuid
 from typing import Any
 
+import config
 import database as db
 from config import DAILY_CAP
 from harness import Agent, LLMUnavailable, OpenRouterLLM
 from prompts import SYSTEM_PROMPT, build_turn
 from redaction import redact
-from tools import TZ, build_registry
+from tools import TZ, build_registry, in_window
 
 RESIDENT_NAME = "Asha Verma"          # fake; redacted before any model call
 FEE_PAISE = 600000                    # Rs 6,000
@@ -137,30 +138,50 @@ def get_state() -> dict[str, Any]:
 
 def resident_says(body: str) -> None:
     i = ids()
+    now = clock()
     with db.session("app", i["property"]) as c:
-        m = db.create_chat_message(c, resident_id=i["resident"], direction="in", body=body.strip(), created_at=clock())
+        m = db.create_chat_message(c, resident_id=i["resident"], direction="in", body=body.strip(), created_at=now)
+        db.update_case_file(c, i["case"], next_action_at=now)      # a new message makes the case due right away
         _audit(c, "person", "resident_message", i["case"], {"chat_message_id": m["id"]})
 
 
 def _send(c, draft: dict, now: dt.datetime) -> None:
-    i = ids()
+    """Deliver an approved draft: write the outbound chat message and move the case forward."""
     case = db.get_case_file(c, draft["case_id"])
+    resident = db.get_case_resident(c, case["id"])
     db.update_message_draft(c, draft["id"], status="sent")
-    db.create_chat_message(c, resident_id=i["resident"], direction="out", body=draft["body"], created_at=now)
-    db.update_case_file(c, case["id"], messages_sent=case["messages_sent"] + 1,
-                        ladder_step=max(case["ladder_step"], draft["ladder_step"]))
+    db.create_chat_message(c, resident_id=resident["id"], direction="out", body=draft["body"], created_at=now)
+    fields: dict[str, Any] = {"messages_sent": case["messages_sent"] + 1,
+                              "ladder_step": max(case["ladder_step"], draft["ladder_step"])}
+    gap = config.LADDER_GAP_DAYS.get(draft["ladder_step"])
+    if gap and draft["ladder_step"] > case["ladder_step"]:       # a reminder moved the ladder: schedule the next rung
+        fields["next_action_at"] = now + dt.timedelta(days=gap)
+    db.update_case_file(c, case["id"], **fields)
     _audit(c, "system", "message_sent", case["id"], {"draft_id": draft["id"], "ladder_step": draft["ladder_step"]})
 
 
+def send_draft(draft_id: uuid.UUID, property_id: uuid.UUID, now: dt.datetime) -> str:
+    """Send a held draft if its time has come and we are inside the 09:00 to 20:59 window."""
+    if not in_window(now):
+        return "outside_window"
+    with db.session("app", property_id) as c:
+        d = db.get_message_draft(c, draft_id)
+        if not d or d["status"] != "held" or d["send_after"] > now:
+            return "not_due"
+        _send(c, d, now)
+    return "sent"
+
+
 def release_due_drafts() -> None:
-    """Send approved drafts whose time has come (e.g. held overnight until 09:00)."""
+    """Demo helper: send this case's held drafts whose time has come (uses the simulated clock)."""
     if _state["ids"] is None:
         return
     i = _state["ids"]
     now = clock()
     with db.session("app", i["property"]) as c:
-        for d in db.list_message_drafts(c, case_id=i["case"], status="held", send_after_before=now):
-            _send(c, d, now)
+        due = db.list_message_drafts(c, case_id=i["case"], status="held", send_after_before=now)
+    for d in due:
+        send_draft(d["id"], i["property"], now)
 
 
 def approve(draft_id: uuid.UUID) -> str:
@@ -173,7 +194,7 @@ def approve(draft_id: uuid.UUID) -> str:
         db.update_message_draft(c, d["id"], status="approved", approved_by=i["owner"])
         _audit(c, "person", "approve_draft", i["case"], {"draft_id": d["id"]})
         d = db.get_message_draft(c, d["id"])
-        if d["send_after"] <= now:
+        if d["send_after"] <= now and in_window(now):
             _send(c, d, now)
             return "sent"
         db.update_message_draft(c, d["id"], status="held")
@@ -198,56 +219,78 @@ def reject(draft_id: uuid.UUID) -> None:
 _llm = None
 
 
-def run_agent() -> dict[str, Any]:
+def _get_llm() -> OpenRouterLLM:
     global _llm
+    _llm = _llm or OpenRouterLLM(max_tokens=500)
+    return _llm
+
+
+def run_case(case_id: uuid.UUID, property_id: uuid.UUID, now: dt.datetime, clock_fn=None) -> dict[str, Any]:
+    """Run the agent once for one case. Used by the test bench and by the Celery task.
+
+    Raises LLMUnavailable if no model answers (the Celery task retries). After the run, a case
+    that is still due gets a recheck time so it is not picked up again on the next scan.
+    """
+    clock_fn = clock_fn or (lambda: now)
+    reg = build_registry(property_id, clock=clock_fn)
+    with db.session("agent", property_id) as c:
+        case = db.get_case_file(c, case_id)
+        if case is None:
+            return {"status": "skipped", "reason": "case not found", "steps": [], "replies": [], "model": None}
+        resident = db.get_case_resident(c, case_id)
+        last = db.list_agent_runs(c, case_id=case_id, limit=1)
+        inbound = db.list_chat_messages(c, resident_id=resident["id"], direction="in",
+                                        since=last[0]["started_at"] if last else None)
+    name = resident["display_name"]
+    if case["status"] in ("closed", "stopped") or (case["status"] == "escalated" and not inbound):
+        return {"status": "skipped", "reason": f"case is {case['status']} and there is nothing new from the resident",
+                "steps": [], "replies": [], "model": None}
+    with db.session("agent", property_id) as c:
+        run = db.create_agent_run(c, case_id=case_id, status="running", started_at=now)
+
+    snap = reg.get("get_case").fn(id=str(case_id))
+    snap.pop("drafts")
+    turn = build_turn(snap, now.astimezone(TZ).date(), [redact(m["body"], [name]) for m in inbound])
+
+    def checkpoint(st) -> None:
+        with db.session("agent", property_id) as c:
+            db.update_agent_run(c, run["id"], step_count=st.step, checkpoint=st.to_json())
+
+    def on_event(ev: dict) -> None:
+        if ev["type"] == "finished":
+            return
+        with db.session("agent", property_id) as c:
+            _audit(c, "agent", ev["type"] if ev["type"] != "tool_result" else ev["tool"], case_id,
+                   {k: v for k, v in ev.items() if k not in ("type", "run_id", "sig")}, run_id=run["id"])
+
+    llm = _get_llm()
+    try:
+        res = Agent(llm, reg, SYSTEM_PROMPT, max_steps=5, checkpoint=checkpoint, on_event=on_event
+                    ).run(turn, run_id=str(run["id"]))
+    except LLMUnavailable:
+        with db.session("agent", property_id) as c:
+            db.update_agent_run(c, run["id"], status="error")
+        raise
+    with db.session("agent", property_id) as c:
+        db.update_agent_run(c, run["id"], status=res.status)
+        after = db.get_case_file(c, case_id)
+        if after["status"] in ("open", "promised") and after["next_action_at"] <= now:
+            db.update_case_file(c, case_id, next_action_at=now + dt.timedelta(hours=config.RECHECK_HOURS))
+    steps = [{"step": e["step"], "type": e["type"], "tool": e.get("tool"), "args": e.get("args"),
+              "ok": e.get("ok"), "result": e.get("result"), "why": e.get("why") or e.get("error"),
+              "reason": e.get("reason")} for e in res.state.events if e["type"] != "finished"]
+    return {"status": res.status, "model": llm.last_model, "steps": steps,
+            "replies": [m["content"] for m in res.state.messages if m["role"] == "assistant"],
+            "new_messages": [redact(m["body"], [name]) for m in inbound]}
+
+
+def run_agent() -> dict[str, Any]:
+    """Test-bench button: run the demo case now, on the simulated clock."""
     i = ids()
     release_due_drafts()
-    now = clock()
     if not _lock.acquire(blocking=False):
         raise RuntimeError("the agent is already running")
     try:
-        reg = build_registry(i["property"], clock=clock)
-        with db.session("agent", i["property"]) as c:
-            case = db.get_case_file(c, i["case"])
-            last = db.list_agent_runs(c, case_id=i["case"], limit=1)
-            inbound = db.list_chat_messages(c, resident_id=i["resident"], direction="in",
-                                            since=last[0]["started_at"] if last else None)
-        if case["status"] in ("closed", "stopped") or (case["status"] == "escalated" and not inbound):
-            return {"status": "skipped", "reason": f"case is {case['status']} and there is nothing new from the resident",
-                    "steps": [], "replies": [], "model": None}
-        with db.session("agent", i["property"]) as c:
-            run = db.create_agent_run(c, case_id=i["case"], status="running", started_at=now)
-
-        snap = reg.get("get_case").fn(id=str(i["case"]))
-        snap.pop("drafts")
-        turn = build_turn(snap, now.date(), [redact(m["body"], [RESIDENT_NAME]) for m in inbound])
-
-        def checkpoint(st) -> None:
-            with db.session("agent", i["property"]) as c:
-                db.update_agent_run(c, run["id"], step_count=st.step, checkpoint=st.to_json())
-
-        def on_event(ev: dict) -> None:
-            if ev["type"] == "finished":
-                return
-            with db.session("agent", i["property"]) as c:
-                _audit(c, "agent", ev["type"] if ev["type"] != "tool_result" else ev["tool"], i["case"],
-                       {k: v for k, v in ev.items() if k not in ("type", "run_id", "sig")}, run_id=run["id"])
-
-        _llm = _llm or OpenRouterLLM(max_tokens=500)
-        try:
-            res = Agent(_llm, reg, SYSTEM_PROMPT, max_steps=5, checkpoint=checkpoint, on_event=on_event
-                        ).run(turn, run_id=str(run["id"]))
-        except LLMUnavailable as e:
-            with db.session("agent", i["property"]) as c:
-                db.update_agent_run(c, run["id"], status="error")
-            raise
-        with db.session("agent", i["property"]) as c:
-            db.update_agent_run(c, run["id"], status=res.status)
-        steps = [{"step": e["step"], "type": e["type"], "tool": e.get("tool"), "args": e.get("args"),
-                  "ok": e.get("ok"), "result": e.get("result"), "why": e.get("why") or e.get("error"),
-                  "reason": e.get("reason")} for e in res.state.events if e["type"] != "finished"]
-        return {"status": res.status, "model": _llm.last_model, "steps": steps,
-                "replies": [m["content"] for m in res.state.messages if m["role"] == "assistant"],
-                "new_messages": [redact(m["body"], [RESIDENT_NAME]) for m in inbound]}
+        return run_case(i["case"], i["property"], clock(), clock)
     finally:
         _lock.release()

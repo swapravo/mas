@@ -395,3 +395,25 @@ def count_resident_drafts_between(conn: Conn, resident_id: uuid.UUID, start: dt.
            JOIN fee_charge f ON f.id = c.fee_charge_id
            WHERE f.resident_id = %s AND d.status <> 'rejected' AND d.send_after >= %s AND d.send_after < %s""",
         (resident_id, start, end)).fetchone()["n"]
+
+
+# ---------------------------------------------------------------------------
+# Scheduler queries (run as the read-only 'worker' role, across all properties)
+# ---------------------------------------------------------------------------
+
+def list_cases_to_work(conn: Conn, *, now: dt.datetime, limit: int = 50) -> list[Row]:
+    """Active cases on unpaid fees whose next_action_at has come. Returns case_id and property_id only."""
+    return conn.execute(
+        """SELECT c.id AS case_id, r.property_id FROM case_file c
+           JOIN fee_charge f ON f.id = c.fee_charge_id JOIN resident r ON r.id = f.resident_id
+           WHERE c.status IN ('open', 'promised') AND f.status IN ('due', 'overdue') AND c.next_action_at <= %s
+           ORDER BY c.next_action_at, c.id LIMIT %s""", (now, int(limit))).fetchall()
+
+
+def list_due_held_drafts(conn: Conn, *, now: dt.datetime, limit: int = 100) -> list[Row]:
+    """Approved drafts held overnight whose send time has come. Returns draft_id and property_id only."""
+    return conn.execute(
+        """SELECT d.id AS draft_id, r.property_id FROM message_draft d
+           JOIN case_file c ON c.id = d.case_id JOIN fee_charge f ON f.id = c.fee_charge_id
+           JOIN resident r ON r.id = f.resident_id
+           WHERE d.status = 'held' AND d.send_after <= %s ORDER BY d.send_after LIMIT %s""", (now, int(limit))).fetchall()

@@ -13,5 +13,12 @@ services:
       test: ["CMD-SHELL", "pg_isready -U mas_owner -d mas"]
       interval: 3s
       retries: 20
+  redis:
+    image: redis:7
+    ports: ["127.0.0.1:6380:6379"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 3s
+      retries: 20
 volumes:
   pgdata:

@@ -65,11 +65,16 @@ def _fee_view(fee: dict, today: dt.date) -> dict[str, Any]:
             "status": fee["status"], "days_overdue": _days_overdue(fee["due_date"], today)}
 
 
+def in_window(now: dt.datetime) -> bool:
+    """True from 09:00 to 20:59 local time, the only hours the agent may run or messages may go out."""
+    return config.QUIET_HOURS[1] <= now.astimezone(TZ).hour < config.QUIET_HOURS[0]
+
+
 def next_send_time(now: dt.datetime) -> dt.datetime:
     """Now if inside allowed hours, otherwise the next 09:00 local time."""
     local = now.astimezone(TZ)
-    start, end = config.QUIET_HOURS[1], config.QUIET_HOURS[0]
-    if start <= local.hour < end:
+    start = config.QUIET_HOURS[1]
+    if in_window(now):
         return now
     day = local.date() if local.hour < start else local.date() + dt.timedelta(days=1)
     return dt.datetime.combine(day, dt.time(start), tzinfo=TZ)

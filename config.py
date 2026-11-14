@@ -33,7 +33,11 @@ DATABASE_URLS = {
     "owner": os.environ.get("DATABASE_URL_OWNER", "postgresql://mas_owner:mas_owner_pw@localhost:5432/mas"),
     "app":   os.environ.get("DATABASE_URL_APP",   "postgresql://mas_app:mas_app_pw@localhost:5432/mas"),
     "agent": os.environ.get("DATABASE_URL_AGENT", "postgresql://mas_agent:mas_agent_pw@localhost:5432/mas"),
+    "worker": os.environ.get("DATABASE_URL_WORKER", "postgresql://mas_worker:mas_worker_pw@localhost:5432/mas"),
 }
+
+# --- Celery / Redis ------------------------------------------------------------
+REDIS_URL = os.environ.get("REDIS_URL", "redis://localhost:6380/0")
 
 # --- Business rules (enforced by tools.py, mirrored in the prompt) ------------
 TIMEZONE = "Asia/Kolkata"
@@ -42,3 +46,11 @@ DAILY_CAP = 2                  # max messages per resident per day
 MAX_PROMISE_DAYS = 60          # a promised date further out than this is refused
 MAX_MESSAGE_CHARS = 400
 HISTORY_MAX = 20               # most chat messages get_chat_history returns
+
+# --- Scheduling ----------------------------------------------------------------
+# The pipeline runs only from 09:00 to 20:59 India time (QUIET_HOURS is the complement).
+SCAN_EVERY_MINUTES = 15        # beat fires at :00, :15, :30, :45 for hours 09 to 20
+RECHECK_HOURS = 4              # after a run that leaves the case waiting, look again after this long
+LADDER_GAP_DAYS = {1: 3, 2: 4}  # after step 1 is sent, step 2 is due 3 days later; after step 2, escalate 4 days later (day 7)
+CASE_LOCK_SECONDS = 300        # one agent run per case at a time
+MAX_CASES_PER_SCAN = 50

@@ -130,6 +130,9 @@ DO $$ BEGIN
     IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'mas_agent') THEN
         CREATE ROLE mas_agent LOGIN PASSWORD 'mas_agent_pw';
     END IF;
+    IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'mas_worker') THEN
+        CREATE ROLE mas_worker LOGIN PASSWORD 'mas_worker_pw';
+    END IF;
 END $$;
 
 -- ---------------------------------------------------------------------
@@ -162,11 +165,22 @@ CREATE POLICY property_scope ON message_draft FOR ALL TO mas_app, mas_agent USIN
 CREATE POLICY property_scope ON chat_message  FOR ALL TO mas_app, mas_agent USING (resident_id IN (SELECT id FROM resident));
 CREATE POLICY property_scope ON agent_run     FOR ALL TO mas_app, mas_agent USING (case_id IN (SELECT id FROM case_file));
 
+-- The scheduler role (Celery) must find work across every property, but only reads.
+-- It lists cases and held drafts, then hands each one to the agent or core API, which run
+-- scoped to a single property. It cannot write and cannot see messages or personal data.
+CREATE POLICY worker_read ON resident      FOR SELECT TO mas_worker USING (true);
+CREATE POLICY worker_read ON fee_charge    FOR SELECT TO mas_worker USING (true);
+CREATE POLICY worker_read ON case_file     FOR SELECT TO mas_worker USING (true);
+CREATE POLICY worker_read ON message_draft FOR SELECT TO mas_worker USING (true);
+
 -- ---------------------------------------------------------------------
 -- Privileges
 -- ---------------------------------------------------------------------
-GRANT USAGE ON SCHEMA public TO mas_app, mas_agent;
+GRANT USAGE ON SCHEMA public TO mas_app, mas_agent, mas_worker;
 GRANT EXECUTE ON FUNCTION app_property_id() TO mas_app, mas_agent;
+
+-- Scheduler: read only, and only the columns' tables it needs to find work.
+GRANT SELECT ON resident, fee_charge, case_file, message_draft TO mas_worker;
 
 -- Core API: normal reads and writes. audit_log is read and insert only.
 GRANT SELECT, INSERT, UPDATE, DELETE ON

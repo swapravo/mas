@@ -1,6 +1,6 @@
 # Collections Agent: the what and the why
 
-Companion to [`how-build-plan.html`](how-build-plan.html), which covers how we build it.
+Companion to [`how-build-plan.md`](how-build-plan.md), which covers how we build it.
 All data in this repo is fake. No real residents, clients or brands appear anywhere.
 
 ## The what

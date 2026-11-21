@@ -1,0 +1,31 @@
+{
+  "leaked_when": {
+    "direct_read": {
+      "no defences": true,
+      "rls only": false,
+      "gateway only": true,
+      "obo only": true,
+      "all on": false
+    },
+    "injection": {
+      "no defences": true,
+      "rls only": true,
+      "gateway only": false,
+      "obo only": true,
+      "all on": false
+    },
+    "confused_deputy": {
+      "no defences": true,
+      "rls only": true,
+      "gateway only": true,
+      "obo only": false,
+      "all on": false
+    }
+  },
+  "intended_layer": {
+    "direct_read": "rls",
+    "injection": "gateway",
+    "confused_deputy": "obo"
+  },
+  "how_to_read": "true = the attack got through. Each row is one attack; each column is which layers were ON."
+}

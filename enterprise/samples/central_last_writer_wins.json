@@ -1,0 +1,418 @@
+{
+  "run": {
+    "settings": {
+      "seed": 7,
+      "mode": "central",
+      "strategy": "last",
+      "cases": 40,
+      "attack_every": 10,
+      "arrival_gap": 3.0,
+      "llm_latency": {
+        "collections": 1.2,
+        "ops": 0.8,
+        "finance": 1.0,
+        "legal": 1.5
+      },
+      "llm_fail": {},
+      "concurrency": 2,
+      "max_agent_steps": 6,
+      "net_latency": 0.05,
+      "redeliver_after": 10.0,
+      "events_carry_text": true,
+      "step_timeout": 20.0,
+      "max_retries": 2,
+      "case_deadline": 900.0,
+      "max_hops": 40,
+      "budget": 40,
+      "idempotent": true,
+      "watchdog": null,
+      "watchdog_timeout": 120.0,
+      "watchdog_interval": 10.0,
+      "approvers": 3,
+      "review_time": 45.0,
+      "rush_threshold": 6,
+      "rush_time": 4.0,
+      "auto_approve": false,
+      "batch": false,
+      "batch_max": 10,
+      "decide_by": 600.0,
+      "horizon": 3600.0,
+      "policy": {
+        "fee_limit": 2000,
+        "repair_days": 7
+      }
+    },
+    "chaos": {
+      "kill": [],
+      "kill_at": 0.0,
+      "net_latency": 0.0,
+      "dept_latency": {},
+      "duplicate_every": 0
+    },
+    "defences_on": [
+      "rls",
+      "gateway",
+      "obo"
+    ]
+  },
+  "results": {
+    "mode": "central",
+    "strategy": "last",
+    "seed": 7,
+    "cases": 40,
+    "messages": 522,
+    "routing_decisions": 241,
+    "completion_seconds": {
+      "p50": 12.21,
+      "p95": 13.36,
+      "max": 13.56
+    },
+    "outcomes": {
+      "completed": 40,
+      "escalated_failure": 0,
+      "stalled": 0
+    },
+    "noticed": {
+      "by": {},
+      "first_notice_after_seconds": null,
+      "last_notice_after_seconds": null
+    },
+    "decisions": {
+      "outcome": {
+        "refuse": 30,
+        "waive": 10
+      },
+      "decided_by": {
+        "last": 40
+      },
+      "policy_blocked": 1
+    },
+    "duplicates": {
+      "injected": 0,
+      "suppressed": 0,
+      "cases_with_double_waiver": 0,
+      "cases_with_double_notice": 0
+    },
+    "effects": {
+      "waivers": 10,
+      "notices": 10
+    },
+    "leaked": {
+      "count": 0,
+      "by_layer": {},
+      "attempts_blocked": 4
+    },
+    "approvals": {
+      "submitted": 40,
+      "auto_approved": 0,
+      "reviewed_by_people": 40,
+      "review_sessions": 40,
+      "rushed": 27,
+      "rushed_share": 0.675,
+      "cards_reviewed": 0,
+      "cards_rushed": 0,
+      "wait_seconds": {
+        "p50": 35.26,
+        "p95": 62.71,
+        "max": 98.34
+      },
+      "queue_length": {
+        "max": 19,
+        "mean": 10.12
+      },
+      "still_waiting_at_end": 0
+    },
+    "faults": {
+      "retries": 0,
+      "escalations": 0,
+      "rejected_handoffs": 0,
+      "lost_bus_down": 0,
+      "dead_letters": 0,
+      "budget_rejects": 0,
+      "llm_failures": 0
+    },
+    "per_case": [
+      {
+        "case": "case-0001",
+        "status": "completed",
+        "outcome": "refuse",
+        "decided_by": "last",
+        "seconds": 11.69
+      },
+      {
+        "case": "case-0002",
+        "status": "completed",
+        "outcome": "refuse",
+        "decided_by": "last",
+        "seconds": 10.64
+      },
+      {
+        "case": "case-0003",
+        "status": "completed",
+        "outcome": "waive",
+        "decided_by": "last",
+        "seconds": 10.12
+      },
+      {
+        "case": "case-0004",
+        "status": "completed",
+        "outcome": "waive",
+        "decided_by": "last",
+        "seconds": 10.58
+      },
+      {
+        "case": "case-0005",
+        "status": "completed",
+        "outcome": "refuse",
+        "decided_by": "last",
+        "seconds": 11.38
+      },
+      {
+        "case": "case-0006",
+        "status": "completed",
+        "outcome": "refuse",
+        "decided_by": "last",
+        "seconds": 11.16
+      },
+      {
+        "case": "case-0007",
+        "status": "completed",
+        "outcome": "refuse",
+        "decided_by": "last",
+        "seconds": 11.98
+      },
+      {
+        "case": "case-0008",
+        "status": "completed",
+        "outcome": "refuse",
+        "decided_by": "last",
+        "seconds": 11.83
+      },
+      {
+        "case": "case-0009",
+        "status": "completed",
+        "outcome": "refuse",
+        "decided_by": "last",
+        "seconds": 12.09
+      },
+      {
+        "case": "case-0010",
+        "status": "completed",
+        "outcome": "waive",
+        "decided_by": "last",
+        "seconds": 12.11
+      },
+      {
+        "case": "case-0011",
+        "status": "completed",
+        "outcome": "waive",
+        "decided_by": "last",
+        "seconds": 11.08
+      },
+      {
+        "case": "case-0012",
+        "status": "completed",
+        "outcome": "refuse",
+        "decided_by": "last",
+        "seconds": 11.59
+      },
+      {
+        "case": "case-0013",
+        "status": "completed",
+        "outcome": "refuse",
+        "decided_by": "last",
+        "seconds": 12.28
+      },
+      {
+        "case": "case-0014",
+        "status": "completed",
+        "outcome": "refuse",
+        "decided_by": "last",
+        "seconds": 13.01
+      },
+      {
+        "case": "case-0015",
+        "status": "completed",
+        "outcome": "refuse",
+        "decided_by": "last",
+        "seconds": 13.36
+      },
+      {
+        "case": "case-0016",
+        "status": "completed",
+        "outcome": "refuse",
+        "decided_by": "last",
+        "seconds": 13.37
+      },
+      {
+        "case": "case-0017",
+        "status": "completed",
+        "outcome": "refuse",
+        "decided_by": "last",
+        "seconds": 13.32
+      },
+      {
+        "case": "case-0018",
+        "status": "completed",
+        "outcome": "waive",
+        "decided_by": "last",
+        "seconds": 12.38
+      },
+      {
+        "case": "case-0019",
+        "status": "completed",
+        "outcome": "refuse",
+        "decided_by": "last",
+        "seconds": 12.49
+      },
+      {
+        "case": "case-0020",
+        "status": "completed",
+        "outcome": "refuse",
+        "decided_by": "last",
+        "seconds": 13.29
+      },
+      {
+        "case": "case-0021",
+        "status": "completed",
+        "outcome": "refuse",
+        "decided_by": "last",
+        "seconds": 13.19
+      },
+      {
+        "case": "case-0022",
+        "status": "completed",
+        "outcome": "waive",
+        "decided_by": "last",
+        "seconds": 12.56
+      },
+      {
+        "case": "case-0023",
+        "status": "completed",
+        "outcome": "refuse",
+        "decided_by": "last",
+        "seconds": 12.65
+      },
+      {
+        "case": "case-0024",
+        "status": "completed",
+        "outcome": "refuse",
+        "decided_by": "last",
+        "seconds": 12.57
+      },
+      {
+        "case": "case-0025",
+        "status": "completed",
+        "outcome": "refuse",
+        "decided_by": "last",
+        "seconds": 12.49
+      },
+      {
+        "case": "case-0026",
+        "status": "completed",
+        "outcome": "refuse",
+        "decided_by": "last",
+        "seconds": 12.64
+      },
+      {
+        "case": "case-0027",
+        "status": "completed",
+        "outcome": "refuse",
+        "decided_by": "last",
+        "seconds": 12.87
+      },
+      {
+        "case": "case-0028",
+        "status": "completed",
+        "outcome": "refuse",
+        "decided_by": "last",
+        "seconds": 12.69
+      },
+      {
+        "case": "case-0029",
+        "status": "completed",
+        "outcome": "refuse",
+        "decided_by": "last",
+        "seconds": 11.69
+      },
+      {
+        "case": "case-0030",
+        "status": "completed",
+        "outcome": "waive",
+        "decided_by": "last",
+        "seconds": 11.37
+      },
+      {
+        "case": "case-0031",
+        "status": "completed",
+        "outcome": "refuse",
+        "decided_by": "last",
+        "seconds": 13.56
+      },
+      {
+        "case": "case-0032",
+        "status": "completed",
+        "outcome": "waive",
+        "decided_by": "last",
+        "seconds": 13.01
+      },
+      {
+        "case": "case-0033",
+        "status": "completed",
+        "outcome": "refuse",
+        "decided_by": "last",
+        "seconds": 12.47
+      },
+      {
+        "case": "case-0034",
+        "status": "completed",
+        "outcome": "refuse",
+        "decided_by": "last",
+        "seconds": 10.98
+      },
+      {
+        "case": "case-0035",
+        "status": "completed",
+        "outcome": "refuse",
+        "decided_by": "last",
+        "seconds": 12.21
+      },
+      {
+        "case": "case-0036",
+        "status": "completed",
+        "outcome": "refuse",
+        "decided_by": "last",
+        "seconds": 11.53
+      },
+      {
+        "case": "case-0037",
+        "status": "completed",
+        "outcome": "refuse",
+        "decided_by": "last",
+        "seconds": 11.78
+      },
+      {
+        "case": "case-0038",
+        "status": "completed",
+        "outcome": "waive",
+        "decided_by": "last",
+        "seconds": 10.93
+      },
+      {
+        "case": "case-0039",
+        "status": "completed",
+        "outcome": "waive",
+        "decided_by": "last",
+        "seconds": 11.51
+      },
+      {
+        "case": "case-0040",
+        "status": "completed",
+        "outcome": "refuse",
+        "decided_by": "last",
+        "seconds": 12.78
+      }
+    ]
+  },
+  "decision_cards": []
+}

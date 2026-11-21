@@ -1,0 +1,417 @@
+{
+  "run": {
+    "settings": {
+      "seed": 7,
+      "mode": "choreography",
+      "strategy": "rules",
+      "cases": 40,
+      "attack_every": 10,
+      "arrival_gap": 3.0,
+      "llm_latency": {
+        "collections": 1.2,
+        "ops": 0.8,
+        "finance": 1.0,
+        "legal": 1.5
+      },
+      "llm_fail": {},
+      "concurrency": 2,
+      "max_agent_steps": 6,
+      "net_latency": 0.05,
+      "redeliver_after": 10.0,
+      "events_carry_text": true,
+      "step_timeout": 20.0,
+      "max_retries": 2,
+      "case_deadline": 900.0,
+      "max_hops": 40,
+      "budget": 40,
+      "idempotent": true,
+      "watchdog": true,
+      "watchdog_timeout": 120.0,
+      "watchdog_interval": 10.0,
+      "approvers": 3,
+      "review_time": 45.0,
+      "rush_threshold": 6,
+      "rush_time": 4.0,
+      "auto_approve": false,
+      "batch": false,
+      "batch_max": 10,
+      "decide_by": 600.0,
+      "horizon": 3600.0,
+      "policy": {
+        "fee_limit": 2000,
+        "repair_days": 7
+      }
+    },
+    "chaos": {
+      "kill": [
+        "finance"
+      ],
+      "kill_at": 0.0,
+      "net_latency": 0.0,
+      "dept_latency": {},
+      "duplicate_every": 0
+    },
+    "defences_on": [
+      "rls",
+      "gateway",
+      "obo"
+    ]
+  },
+  "results": {
+    "mode": "choreography",
+    "strategy": "rules",
+    "seed": 7,
+    "cases": 40,
+    "messages": 160,
+    "routing_decisions": 0,
+    "completion_seconds": {
+      "p50": null,
+      "p95": null,
+      "max": null
+    },
+    "outcomes": {
+      "completed": 0,
+      "escalated_failure": 0,
+      "stalled": 40
+    },
+    "noticed": {
+      "by": {
+        "watchdog": 40
+      },
+      "first_notice_after_seconds": 121.0,
+      "last_notice_after_seconds": 130.0
+    },
+    "decisions": {
+      "outcome": {},
+      "decided_by": {},
+      "policy_blocked": 0
+    },
+    "duplicates": {
+      "injected": 0,
+      "suppressed": 0,
+      "cases_with_double_waiver": 0,
+      "cases_with_double_notice": 0
+    },
+    "effects": {
+      "waivers": 0,
+      "notices": 0
+    },
+    "leaked": {
+      "count": 0,
+      "by_layer": {},
+      "attempts_blocked": 8
+    },
+    "approvals": {
+      "submitted": 0,
+      "auto_approved": 0,
+      "reviewed_by_people": 0,
+      "review_sessions": 0,
+      "rushed": 0,
+      "rushed_share": 0.0,
+      "cards_reviewed": 0,
+      "cards_rushed": 0,
+      "wait_seconds": {
+        "p50": null,
+        "p95": null,
+        "max": null
+      },
+      "queue_length": {
+        "max": 0,
+        "mean": 0.0
+      },
+      "still_waiting_at_end": 0
+    },
+    "faults": {
+      "retries": 0,
+      "escalations": 0,
+      "rejected_handoffs": 0,
+      "lost_bus_down": 0,
+      "dead_letters": 0,
+      "budget_rejects": 0,
+      "llm_failures": 0
+    },
+    "per_case": [
+      {
+        "case": "case-0001",
+        "status": "open",
+        "outcome": null,
+        "decided_by": null,
+        "seconds": null
+      },
+      {
+        "case": "case-0002",
+        "status": "open",
+        "outcome": null,
+        "decided_by": null,
+        "seconds": null
+      },
+      {
+        "case": "case-0003",
+        "status": "open",
+        "outcome": null,
+        "decided_by": null,
+        "seconds": null
+      },
+      {
+        "case": "case-0004",
+        "status": "open",
+        "outcome": null,
+        "decided_by": null,
+        "seconds": null
+      },
+      {
+        "case": "case-0005",
+        "status": "open",
+        "outcome": null,
+        "decided_by": null,
+        "seconds": null
+      },
+      {
+        "case": "case-0006",
+        "status": "open",
+        "outcome": null,
+        "decided_by": null,
+        "seconds": null
+      },
+      {
+        "case": "case-0007",
+        "status": "open",
+        "outcome": null,
+        "decided_by": null,
+        "seconds": null
+      },
+      {
+        "case": "case-0008",
+        "status": "open",
+        "outcome": null,
+        "decided_by": null,
+        "seconds": null
+      },
+      {
+        "case": "case-0009",
+        "status": "open",
+        "outcome": null,
+        "decided_by": null,
+        "seconds": null
+      },
+      {
+        "case": "case-0010",
+        "status": "open",
+        "outcome": null,
+        "decided_by": null,
+        "seconds": null
+      },
+      {
+        "case": "case-0011",
+        "status": "open",
+        "outcome": null,
+        "decided_by": null,
+        "seconds": null
+      },
+      {
+        "case": "case-0012",
+        "status": "open",
+        "outcome": null,
+        "decided_by": null,
+        "seconds": null
+      },
+      {
+        "case": "case-0013",
+        "status": "open",
+        "outcome": null,
+        "decided_by": null,
+        "seconds": null
+      },
+      {
+        "case": "case-0014",
+        "status": "open",
+        "outcome": null,
+        "decided_by": null,
+        "seconds": null
+      },
+      {
+        "case": "case-0015",
+        "status": "open",
+        "outcome": null,
+        "decided_by": null,
+        "seconds": null
+      },
+      {
+        "case": "case-0016",
+        "status": "open",
+        "outcome": null,
+        "decided_by": null,
+        "seconds": null
+      },
+      {
+        "case": "case-0017",
+        "status": "open",
+        "outcome": null,
+        "decided_by": null,
+        "seconds": null
+      },
+      {
+        "case": "case-0018",
+        "status": "open",
+        "outcome": null,
+        "decided_by": null,
+        "seconds": null
+      },
+      {
+        "case": "case-0019",
+        "status": "open",
+        "outcome": null,
+        "decided_by": null,
+        "seconds": null
+      },
+      {
+        "case": "case-0020",
+        "status": "open",
+        "outcome": null,
+        "decided_by": null,
+        "seconds": null
+      },
+      {
+        "case": "case-0021",
+        "status": "open",
+        "outcome": null,
+        "decided_by": null,
+        "seconds": null
+      },
+      {
+        "case": "case-0022",
+        "status": "open",
+        "outcome": null,
+        "decided_by": null,
+        "seconds": null
+      },
+      {
+        "case": "case-0023",
+        "status": "open",
+        "outcome": null,
+        "decided_by": null,
+        "seconds": null
+      },
+      {
+        "case": "case-0024",
+        "status": "open",
+        "outcome": null,
+        "decided_by": null,
+        "seconds": null
+      },
+      {
+        "case": "case-0025",
+        "status": "open",
+        "outcome": null,
+        "decided_by": null,
+        "seconds": null
+      },
+      {
+        "case": "case-0026",
+        "status": "open",
+        "outcome": null,
+        "decided_by": null,
+        "seconds": null
+      },
+      {
+        "case": "case-0027",
+        "status": "open",
+        "outcome": null,
+        "decided_by": null,
+        "seconds": null
+      },
+      {
+        "case": "case-0028",
+        "status": "open",
+        "outcome": null,
+        "decided_by": null,
+        "seconds": null
+      },
+      {
+        "case": "case-0029",
+        "status": "open",
+        "outcome": null,
+        "decided_by": null,
+        "seconds": null
+      },
+      {
+        "case": "case-0030",
+        "status": "open",
+        "outcome": null,
+        "decided_by": null,
+        "seconds": null
+      },
+      {
+        "case": "case-0031",
+        "status": "open",
+        "outcome": null,
+        "decided_by": null,
+        "seconds": null
+      },
+      {
+        "case": "case-0032",
+        "status": "open",
+        "outcome": null,
+        "decided_by": null,
+        "seconds": null
+      },
+      {
+        "case": "case-0033",
+        "status": "open",
+        "outcome": null,
+        "decided_by": null,
+        "seconds": null
+      },
+      {
+        "case": "case-0034",
+        "status": "open",
+        "outcome": null,
+        "decided_by": null,
+        "seconds": null
+      },
+      {
+        "case": "case-0035",
+        "status": "open",
+        "outcome": null,
+        "decided_by": null,
+        "seconds": null
+      },
+      {
+        "case": "case-0036",
+        "status": "open",
+        "outcome": null,
+        "decided_by": null,
+        "seconds": null
+      },
+      {
+        "case": "case-0037",
+        "status": "open",
+        "outcome": null,
+        "decided_by": null,
+        "seconds": null
+      },
+      {
+        "case": "case-0038",
+        "status": "open",
+        "outcome": null,
+        "decided_by": null,
+        "seconds": null
+      },
+      {
+        "case": "case-0039",
+        "status": "open",
+        "outcome": null,
+        "decided_by": null,
+        "seconds": null
+      },
+      {
+        "case": "case-0040",
+        "status": "open",
+        "outcome": null,
+        "decided_by": null,
+        "seconds": null
+      }
+    ]
+  },
+  "decision_cards": []
+}

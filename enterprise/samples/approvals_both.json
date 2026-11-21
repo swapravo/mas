@@ -1,0 +1,860 @@
+{
+  "run": {
+    "settings": {
+      "seed": 7,
+      "mode": "central",
+      "strategy": "rules",
+      "cases": 40,
+      "attack_every": 10,
+      "arrival_gap": 3.0,
+      "llm_latency": {
+        "collections": 1.2,
+        "ops": 0.8,
+        "finance": 1.0,
+        "legal": 1.5
+      },
+      "llm_fail": {},
+      "concurrency": 2,
+      "max_agent_steps": 6,
+      "net_latency": 0.05,
+      "redeliver_after": 10.0,
+      "events_carry_text": true,
+      "step_timeout": 20.0,
+      "max_retries": 2,
+      "case_deadline": 900.0,
+      "max_hops": 40,
+      "budget": 40,
+      "idempotent": true,
+      "watchdog": null,
+      "watchdog_timeout": 120.0,
+      "watchdog_interval": 10.0,
+      "approvers": 3,
+      "review_time": 45.0,
+      "rush_threshold": 6,
+      "rush_time": 4.0,
+      "auto_approve": true,
+      "batch": true,
+      "batch_max": 10,
+      "decide_by": 600.0,
+      "horizon": 3600.0,
+      "policy": {
+        "fee_limit": 2000,
+        "repair_days": 7
+      }
+    },
+    "chaos": {
+      "kill": [],
+      "kill_at": 0.0,
+      "net_latency": 0.0,
+      "dept_latency": {},
+      "duplicate_every": 0
+    },
+    "defences_on": [
+      "rls",
+      "gateway",
+      "obo"
+    ]
+  },
+  "results": {
+    "mode": "central",
+    "strategy": "rules",
+    "seed": 7,
+    "cases": 40,
+    "messages": 530,
+    "routing_decisions": 240,
+    "completion_seconds": {
+      "p50": 11.61,
+      "p95": 115.29,
+      "max": 141.4
+    },
+    "outcomes": {
+      "completed": 40,
+      "escalated_failure": 0,
+      "stalled": 0
+    },
+    "noticed": {
+      "by": {},
+      "first_notice_after_seconds": 139.0,
+      "last_notice_after_seconds": 139.0
+    },
+    "decisions": {
+      "outcome": {
+        "refuse": 25,
+        "waive": 15
+      },
+      "decided_by": {
+        "rule": 30,
+        "human": 10
+      },
+      "policy_blocked": 0
+    },
+    "duplicates": {
+      "injected": 0,
+      "suppressed": 0,
+      "cases_with_double_waiver": 0,
+      "cases_with_double_notice": 0
+    },
+    "effects": {
+      "waivers": 15,
+      "notices": 5
+    },
+    "leaked": {
+      "count": 0,
+      "by_layer": {},
+      "attempts_blocked": 4
+    },
+    "approvals": {
+      "submitted": 50,
+      "auto_approved": 20,
+      "reviewed_by_people": 30,
+      "review_sessions": 17,
+      "rushed": 2,
+      "rushed_share": 0.067,
+      "cards_reviewed": 10,
+      "cards_rushed": 0,
+      "wait_seconds": {
+        "p50": 6.01,
+        "p95": 83.34,
+        "max": 90.24
+      },
+      "queue_length": {
+        "max": 10,
+        "mean": 4.93
+      },
+      "still_waiting_at_end": 0
+    },
+    "faults": {
+      "retries": 0,
+      "escalations": 0,
+      "rejected_handoffs": 0,
+      "lost_bus_down": 0,
+      "dead_letters": 0,
+      "budget_rejects": 0,
+      "llm_failures": 0
+    },
+    "per_case": [
+      {
+        "case": "case-0001",
+        "status": "completed",
+        "outcome": "refuse",
+        "decided_by": "rule",
+        "seconds": 11.69
+      },
+      {
+        "case": "case-0002",
+        "status": "completed",
+        "outcome": "refuse",
+        "decided_by": "human",
+        "seconds": 56.61
+      },
+      {
+        "case": "case-0003",
+        "status": "completed",
+        "outcome": "waive",
+        "decided_by": "rule",
+        "seconds": 10.35
+      },
+      {
+        "case": "case-0004",
+        "status": "completed",
+        "outcome": "waive",
+        "decided_by": "rule",
+        "seconds": 10.21
+      },
+      {
+        "case": "case-0005",
+        "status": "completed",
+        "outcome": "refuse",
+        "decided_by": "rule",
+        "seconds": 10.9
+      },
+      {
+        "case": "case-0006",
+        "status": "completed",
+        "outcome": "refuse",
+        "decided_by": "rule",
+        "seconds": 10.45
+      },
+      {
+        "case": "case-0007",
+        "status": "completed",
+        "outcome": "waive",
+        "decided_by": "human",
+        "seconds": 58.0
+      },
+      {
+        "case": "case-0008",
+        "status": "completed",
+        "outcome": "refuse",
+        "decided_by": "rule",
+        "seconds": 11.26
+      },
+      {
+        "case": "case-0009",
+        "status": "completed",
+        "outcome": "refuse",
+        "decided_by": "rule",
+        "seconds": 11.78
+      },
+      {
+        "case": "case-0010",
+        "status": "completed",
+        "outcome": "waive",
+        "decided_by": "rule",
+        "seconds": 11.18
+      },
+      {
+        "case": "case-0011",
+        "status": "completed",
+        "outcome": "waive",
+        "decided_by": "rule",
+        "seconds": 11.61
+      },
+      {
+        "case": "case-0012",
+        "status": "completed",
+        "outcome": "refuse",
+        "decided_by": "rule",
+        "seconds": 12.25
+      },
+      {
+        "case": "case-0013",
+        "status": "completed",
+        "outcome": "refuse",
+        "decided_by": "human",
+        "seconds": 91.1
+      },
+      {
+        "case": "case-0014",
+        "status": "completed",
+        "outcome": "waive",
+        "decided_by": "human",
+        "seconds": 79.79
+      },
+      {
+        "case": "case-0015",
+        "status": "completed",
+        "outcome": "refuse",
+        "decided_by": "rule",
+        "seconds": 11.18
+      },
+      {
+        "case": "case-0016",
+        "status": "completed",
+        "outcome": "refuse",
+        "decided_by": "rule",
+        "seconds": 11.3
+      },
+      {
+        "case": "case-0017",
+        "status": "completed",
+        "outcome": "refuse",
+        "decided_by": "rule",
+        "seconds": 14.16
+      },
+      {
+        "case": "case-0018",
+        "status": "completed",
+        "outcome": "waive",
+        "decided_by": "rule",
+        "seconds": 14.53
+      },
+      {
+        "case": "case-0019",
+        "status": "completed",
+        "outcome": "refuse",
+        "decided_by": "rule",
+        "seconds": 13.77
+      },
+      {
+        "case": "case-0020",
+        "status": "completed",
+        "outcome": "refuse",
+        "decided_by": "human",
+        "seconds": 71.97
+      },
+      {
+        "case": "case-0021",
+        "status": "completed",
+        "outcome": "refuse",
+        "decided_by": "rule",
+        "seconds": 12.19
+      },
+      {
+        "case": "case-0022",
+        "status": "completed",
+        "outcome": "waive",
+        "decided_by": "rule",
+        "seconds": 10.27
+      },
+      {
+        "case": "case-0023",
+        "status": "completed",
+        "outcome": "refuse",
+        "decided_by": "rule",
+        "seconds": 11.41
+      },
+      {
+        "case": "case-0024",
+        "status": "completed",
+        "outcome": "waive",
+        "decided_by": "human",
+        "seconds": 111.49
+      },
+      {
+        "case": "case-0025",
+        "status": "completed",
+        "outcome": "waive",
+        "decided_by": "human",
+        "seconds": 108.46
+      },
+      {
+        "case": "case-0026",
+        "status": "completed",
+        "outcome": "refuse",
+        "decided_by": "rule",
+        "seconds": 12.22
+      },
+      {
+        "case": "case-0027",
+        "status": "completed",
+        "outcome": "refuse",
+        "decided_by": "rule",
+        "seconds": 12.05
+      },
+      {
+        "case": "case-0028",
+        "status": "completed",
+        "outcome": "refuse",
+        "decided_by": "human",
+        "seconds": 141.4
+      },
+      {
+        "case": "case-0029",
+        "status": "completed",
+        "outcome": "refuse",
+        "decided_by": "rule",
+        "seconds": 10.93
+      },
+      {
+        "case": "case-0030",
+        "status": "completed",
+        "outcome": "waive",
+        "decided_by": "rule",
+        "seconds": 11.1
+      },
+      {
+        "case": "case-0031",
+        "status": "completed",
+        "outcome": "refuse",
+        "decided_by": "rule",
+        "seconds": 11.54
+      },
+      {
+        "case": "case-0032",
+        "status": "completed",
+        "outcome": "waive",
+        "decided_by": "rule",
+        "seconds": 10.69
+      },
+      {
+        "case": "case-0033",
+        "status": "completed",
+        "outcome": "refuse",
+        "decided_by": "rule",
+        "seconds": 11.36
+      },
+      {
+        "case": "case-0034",
+        "status": "completed",
+        "outcome": "refuse",
+        "decided_by": "rule",
+        "seconds": 11.08
+      },
+      {
+        "case": "case-0035",
+        "status": "completed",
+        "outcome": "refuse",
+        "decided_by": "rule",
+        "seconds": 12.67
+      },
+      {
+        "case": "case-0036",
+        "status": "completed",
+        "outcome": "refuse",
+        "decided_by": "rule",
+        "seconds": 11.25
+      },
+      {
+        "case": "case-0037",
+        "status": "completed",
+        "outcome": "refuse",
+        "decided_by": "human",
+        "seconds": 115.29
+      },
+      {
+        "case": "case-0038",
+        "status": "completed",
+        "outcome": "waive",
+        "decided_by": "rule",
+        "seconds": 10.57
+      },
+      {
+        "case": "case-0039",
+        "status": "completed",
+        "outcome": "waive",
+        "decided_by": "rule",
+        "seconds": 11.35
+      },
+      {
+        "case": "case-0040",
+        "status": "completed",
+        "outcome": "waive",
+        "decided_by": "human",
+        "seconds": 121.25
+      }
+    ]
+  },
+  "decision_cards": [
+    {
+      "case": {
+        "case_id": "case-0002",
+        "resident_id": "r-0002",
+        "fee_rupees": 2500
+      },
+      "conflict": {
+        "wants_waiver": [
+          {
+            "dept": "ops",
+            "reason": "repair open 7 days (policy: 7+ days supports a waiver)"
+          }
+        ],
+        "against_waiver": [
+          {
+            "dept": "finance",
+            "reason": "Rs 2500 is above my Rs 2000 limit"
+          },
+          {
+            "dept": "legal",
+            "reason": "a legal notice is live: no waiver"
+          }
+        ]
+      },
+      "options": [
+        {
+          "id": "waive",
+          "effect": "waive Rs 2,500; needs your approval (above Finance's limit)"
+        },
+        {
+          "id": "refuse",
+          "effect": "keep the fee; Legal serves a notice if none is live"
+        }
+      ],
+      "recommendation": {
+        "option": "refuse",
+        "why": "a live legal notice: Legal's objection should not be overruled by a repair delay"
+      },
+      "raised_at": 8.5,
+      "decide_by": 608.5,
+      "escalation_path": [
+        "finance_manager",
+        "head_of_operations",
+        "general_counsel"
+      ]
+    },
+    {
+      "case": {
+        "case_id": "case-0007",
+        "resident_id": "r-0007",
+        "fee_rupees": 2500
+      },
+      "conflict": {
+        "wants_waiver": [
+          {
+            "dept": "ops",
+            "reason": "repair open 21 days (policy: 7+ days supports a waiver)"
+          }
+        ],
+        "against_waiver": [
+          {
+            "dept": "finance",
+            "reason": "Rs 2500 is above my Rs 2000 limit"
+          }
+        ]
+      },
+      "options": [
+        {
+          "id": "waive",
+          "effect": "waive Rs 2,500; needs your approval (above Finance's limit)"
+        },
+        {
+          "id": "refuse",
+          "effect": "keep the fee; Legal serves a notice if none is live"
+        }
+      ],
+      "recommendation": {
+        "option": "waive",
+        "why": "a repair has been open 7+ days and nothing legal stands in the way"
+      },
+      "raised_at": 24.3,
+      "decide_by": 624.3,
+      "escalation_path": [
+        "finance_manager",
+        "head_of_operations",
+        "general_counsel"
+      ]
+    },
+    {
+      "case": {
+        "case_id": "case-0013",
+        "resident_id": "r-0013",
+        "fee_rupees": 9500
+      },
+      "conflict": {
+        "wants_waiver": [
+          {
+            "dept": "ops",
+            "reason": "repair open 7 days (policy: 7+ days supports a waiver)"
+          }
+        ],
+        "against_waiver": [
+          {
+            "dept": "finance",
+            "reason": "Rs 9500 is above my Rs 2000 limit"
+          },
+          {
+            "dept": "legal",
+            "reason": "a legal notice is live: no waiver"
+          }
+        ]
+      },
+      "options": [
+        {
+          "id": "waive",
+          "effect": "waive Rs 9,500; needs your approval (above Finance's limit)"
+        },
+        {
+          "id": "refuse",
+          "effect": "keep the fee; Legal serves a notice if none is live"
+        }
+      ],
+      "recommendation": {
+        "option": "refuse",
+        "why": "a live legal notice: Legal's objection should not be overruled by a repair delay"
+      },
+      "raised_at": 41.6,
+      "decide_by": 641.6,
+      "escalation_path": [
+        "finance_manager",
+        "head_of_operations",
+        "general_counsel"
+      ]
+    },
+    {
+      "case": {
+        "case_id": "case-0014",
+        "resident_id": "r-0014",
+        "fee_rupees": 6500
+      },
+      "conflict": {
+        "wants_waiver": [
+          {
+            "dept": "ops",
+            "reason": "repair open 14 days (policy: 7+ days supports a waiver)"
+          }
+        ],
+        "against_waiver": [
+          {
+            "dept": "finance",
+            "reason": "Rs 6500 is above my Rs 2000 limit"
+          }
+        ]
+      },
+      "options": [
+        {
+          "id": "waive",
+          "effect": "waive Rs 6,500; needs your approval (above Finance's limit)"
+        },
+        {
+          "id": "refuse",
+          "effect": "keep the fee; Legal serves a notice if none is live"
+        }
+      ],
+      "recommendation": {
+        "option": "waive",
+        "why": "a repair has been open 7+ days and nothing legal stands in the way"
+      },
+      "raised_at": 45.2,
+      "decide_by": 645.2,
+      "escalation_path": [
+        "finance_manager",
+        "head_of_operations",
+        "general_counsel"
+      ]
+    },
+    {
+      "case": {
+        "case_id": "case-0020",
+        "resident_id": "r-0020",
+        "fee_rupees": 4000
+      },
+      "conflict": {
+        "wants_waiver": [
+          {
+            "dept": "ops",
+            "reason": "repair open 21 days (policy: 7+ days supports a waiver)"
+          }
+        ],
+        "against_waiver": [
+          {
+            "dept": "finance",
+            "reason": "Rs 4000 is above my Rs 2000 limit"
+          },
+          {
+            "dept": "legal",
+            "reason": "a legal notice is live: no waiver"
+          }
+        ]
+      },
+      "options": [
+        {
+          "id": "waive",
+          "effect": "waive Rs 4,000; needs your approval (above Finance's limit)"
+        },
+        {
+          "id": "refuse",
+          "effect": "keep the fee; Legal serves a notice if none is live"
+        }
+      ],
+      "recommendation": {
+        "option": "refuse",
+        "why": "a live legal notice: Legal's objection should not be overruled by a repair delay"
+      },
+      "raised_at": 63.9,
+      "decide_by": 663.9,
+      "escalation_path": [
+        "finance_manager",
+        "head_of_operations",
+        "general_counsel"
+      ]
+    },
+    {
+      "case": {
+        "case_id": "case-0024",
+        "resident_id": "r-0024",
+        "fee_rupees": 9500
+      },
+      "conflict": {
+        "wants_waiver": [
+          {
+            "dept": "ops",
+            "reason": "repair open 21 days (policy: 7+ days supports a waiver)"
+          }
+        ],
+        "against_waiver": [
+          {
+            "dept": "finance",
+            "reason": "Rs 9500 is above my Rs 2000 limit"
+          }
+        ]
+      },
+      "options": [
+        {
+          "id": "waive",
+          "effect": "waive Rs 9,500; needs your approval (above Finance's limit)"
+        },
+        {
+          "id": "refuse",
+          "effect": "keep the fee; Legal serves a notice if none is live"
+        }
+      ],
+      "recommendation": {
+        "option": "waive",
+        "why": "a repair has been open 7+ days and nothing legal stands in the way"
+      },
+      "raised_at": 74.8,
+      "decide_by": 674.8,
+      "escalation_path": [
+        "finance_manager",
+        "head_of_operations",
+        "general_counsel"
+      ]
+    },
+    {
+      "case": {
+        "case_id": "case-0025",
+        "resident_id": "r-0025",
+        "fee_rupees": 6500
+      },
+      "conflict": {
+        "wants_waiver": [
+          {
+            "dept": "ops",
+            "reason": "repair open 14 days (policy: 7+ days supports a waiver)"
+          }
+        ],
+        "against_waiver": [
+          {
+            "dept": "finance",
+            "reason": "Rs 6500 is above my Rs 2000 limit"
+          }
+        ]
+      },
+      "options": [
+        {
+          "id": "waive",
+          "effect": "waive Rs 6,500; needs your approval (above Finance's limit)"
+        },
+        {
+          "id": "refuse",
+          "effect": "keep the fee; Legal serves a notice if none is live"
+        }
+      ],
+      "recommendation": {
+        "option": "waive",
+        "why": "a repair has been open 7+ days and nothing legal stands in the way"
+      },
+      "raised_at": 77.8,
+      "decide_by": 677.8,
+      "escalation_path": [
+        "finance_manager",
+        "head_of_operations",
+        "general_counsel"
+      ]
+    },
+    {
+      "case": {
+        "case_id": "case-0028",
+        "resident_id": "r-0028",
+        "fee_rupees": 4000
+      },
+      "conflict": {
+        "wants_waiver": [
+          {
+            "dept": "ops",
+            "reason": "repair open 9 days (policy: 7+ days supports a waiver)"
+          }
+        ],
+        "against_waiver": [
+          {
+            "dept": "finance",
+            "reason": "Rs 4000 is above my Rs 2000 limit"
+          },
+          {
+            "dept": "legal",
+            "reason": "a legal notice is live: no waiver"
+          }
+        ]
+      },
+      "options": [
+        {
+          "id": "waive",
+          "effect": "waive Rs 4,000; needs your approval (above Finance's limit)"
+        },
+        {
+          "id": "refuse",
+          "effect": "keep the fee; Legal serves a notice if none is live"
+        }
+      ],
+      "recommendation": {
+        "option": "refuse",
+        "why": "a live legal notice: Legal's objection should not be overruled by a repair delay"
+      },
+      "raised_at": 86.6,
+      "decide_by": 686.6,
+      "escalation_path": [
+        "finance_manager",
+        "head_of_operations",
+        "general_counsel"
+      ]
+    },
+    {
+      "case": {
+        "case_id": "case-0037",
+        "resident_id": "r-0037",
+        "fee_rupees": 4000
+      },
+      "conflict": {
+        "wants_waiver": [
+          {
+            "dept": "ops",
+            "reason": "repair open 21 days (policy: 7+ days supports a waiver)"
+          }
+        ],
+        "against_waiver": [
+          {
+            "dept": "finance",
+            "reason": "Rs 4000 is above my Rs 2000 limit"
+          },
+          {
+            "dept": "legal",
+            "reason": "a legal notice is live: no waiver"
+          }
+        ]
+      },
+      "options": [
+        {
+          "id": "waive",
+          "effect": "waive Rs 4,000; needs your approval (above Finance's limit)"
+        },
+        {
+          "id": "refuse",
+          "effect": "keep the fee; Legal serves a notice if none is live"
+        }
+      ],
+      "recommendation": {
+        "option": "refuse",
+        "why": "a live legal notice: Legal's objection should not be overruled by a repair delay"
+      },
+      "raised_at": 115.2,
+      "decide_by": 715.2,
+      "escalation_path": [
+        "finance_manager",
+        "head_of_operations",
+        "general_counsel"
+      ]
+    },
+    {
+      "case": {
+        "case_id": "case-0040",
+        "resident_id": "r-0040",
+        "fee_rupees": 9500
+      },
+      "conflict": {
+        "wants_waiver": [
+          {
+            "dept": "ops",
+            "reason": "repair open 14 days (policy: 7+ days supports a waiver)"
+          }
+        ],
+        "against_waiver": [
+          {
+            "dept": "finance",
+            "reason": "Rs 9500 is above my Rs 2000 limit"
+          }
+        ]
+      },
+      "options": [
+        {
+          "id": "waive",
+          "effect": "waive Rs 9,500; needs your approval (above Finance's limit)"
+        },
+        {
+          "id": "refuse",
+          "effect": "keep the fee; Legal serves a notice if none is live"
+        }
+      ],
+      "recommendation": {
+        "option": "waive",
+        "why": "a repair has been open 7+ days and nothing legal stands in the way"
+      },
+      "raised_at": 123.8,
+      "decide_by": 723.8,
+      "escalation_path": [
+        "finance_manager",
+        "head_of_operations",
+        "general_counsel"
+      ]
+    }
+  ]
+}

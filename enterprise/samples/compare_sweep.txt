@@ -1,0 +1,20 @@
+strategy=rules cases=40 seed=7 break=none defences=all attacks every 10   (seconds are virtual)
+mode          messages  routing  p50 s  p95 s  completed  escalated  stalled  who noticed  dups inj/supp/double  leaked
+------------  --------  -------  -----  -----  ---------  ---------  -------  -----------  --------------------  ------
+central            530      240  12.74  50.27         40          0        0  -                           0/0/0       0
+hierarchical       850      400  14.43  53.16         40          0        0  -                           0/0/0       0
+choreography       320        0   9.84  63.47         40          0        0  -                           0/0/0       2
+
+strategy=rules cases=40 seed=7 break=coordinator defences=all attacks every 10   (seconds are virtual)
+mode          messages  routing  p50 s  p95 s  completed  escalated  stalled  who noticed   dups inj/supp/double  leaked
+------------  --------  -------  -----  -----  ---------  ---------  -------  ------------  --------------------  ------
+central             40        0      -      -          0          0       40  watchdog x40                 0/0/0       0
+hierarchical        40        0      -      -          0          0       40  watchdog x40                 0/0/0       0
+choreography        40        0      -      -          0          0       40  nobody x40                   0/0/0       0
+
+strategy=rules cases=40 seed=7 break=finance defences=all attacks every 10   (seconds are virtual)
+mode          messages  routing  p50 s  p95 s  completed  escalated  stalled  who noticed       dups inj/supp/double  leaked
+------------  --------  -------  -----  -----  ---------  ---------  -------  ----------------  --------------------  ------
+central            400      160      -      -          0         40        0  orchestrator x40                 0/0/0       0
+hierarchical       560      240      -      -          0         40        0  risk x40                         0/0/0       0
+choreography       160        0      -      -          0          0       40  nobody x40                       0/0/0       0

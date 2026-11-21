@@ -15,6 +15,7 @@ def add_common(ap: argparse.ArgumentParser) -> None:
     ap.add_argument("--strategy", choices=STRATEGIES, default="rules", help="how conflicts are settled")
     ap.add_argument("--cases", type=int, default=40, help="how many disputes")
     ap.add_argument("--seed", type=int, default=7)
+    ap.add_argument("--arrival-gap", type=float, default=3.0, help="seconds between disputes arriving (slow departments need this larger)")
     ap.add_argument("--break", dest="brk", choices=("none", "coordinator", "finance"), default="none",
                     help="coordinator = the orchestrator (central), the top orchestrator (hierarchical) or the event bus (choreography)")
     ap.add_argument("--kill", default="", help="advanced: comma list of components to kill, e.g. ops,risk")
@@ -63,6 +64,7 @@ def build(args, mode: str) -> Simulation:
     chaos = Chaos(kill=tuple(kill), kill_at=args.kill_at, net_latency=args.latency, dept_latency=slow, duplicate_every=args.duplicate)
     settings = Settings(
         seed=args.seed, mode=mode, strategy=args.strategy, cases=args.cases, attack_every=args.attack_every,
+        arrival_gap=args.arrival_gap,
         idempotent=not args.no_idempotency, events_carry_text=not args.no_text_in_events,
         watchdog={"default": None, "on": True, "off": False}[args.watchdog],
         approvers=args.approvers, review_time=args.review_time, rush_threshold=args.rush_threshold,

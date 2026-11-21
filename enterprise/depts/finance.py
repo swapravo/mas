@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from harness import ToolError
 from enterprise.depts.base import Department, Policy, first_result, make_policy
-from enterprise.gateway import Gateway, ToolSpec
+from enterprise.gateway import Gateway, ToolSpec, once
 
 OBJ = {"type": "object"}
 RES = {**OBJ, "properties": {"resident_id": {"type": "string"}}, "required": ["resident_id"]}
@@ -25,11 +25,14 @@ def make_apply_waiver(limit: int):
             raise ToolError(f"amount must be between 1 and the fee ({row['amount']})")
         if amount > limit and not approved_by:         # the policy, in code
             raise ToolError(f"Rs {amount} is above the Rs {limit} Finance may waive alone: needs approval")
-        n = 1 + len([r for r in db.scan("waiver_applied") if r["key"].startswith(f"{case_id}:")])
-        db.put("waiver_applied", f"{case_id}:{n}", {"case_id": case_id, "resident_id": resident_id,
-                                                    "amount": amount, "approved_by": approved_by})
-        db.put("ledger", resident_id, {**row, "waived_total": row.get("waived_total", 0) + amount})
-        return {"waived": amount, "n": n}
+
+        def effect():
+            n = 1 + len([r for r in db.scan("waiver_applied") if r["key"].startswith(f"{case_id}:")])
+            db.put("waiver_applied", f"{case_id}:{n}", {"case_id": case_id, "resident_id": resident_id,
+                                                        "amount": amount, "approved_by": approved_by})
+            db.put("ledger", resident_id, {**row, "waived_total": row.get("waived_total", 0) + amount})
+            return {"waived": amount, "n": n}
+        return once(db, ctx, effect)
     return apply_waiver
 
 

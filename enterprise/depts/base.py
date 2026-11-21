@@ -144,7 +144,7 @@ class Department:
             return Reply(False, error=f"budget exhausted ({spent} of {env.budget} model calls used)")
         llm = SimLLM(self.policy(kind), latency=w.settings.llm_latency.get(self.name, 1.0),
                      fail_rate=w.settings.llm_fail.get(self.name, 0.0), rng=w.rng(f"llm:{self.name}"))
-        ctx = CallContext(self.name, env)
+        ctx = CallContext(self.name, env, idem=env.key() if w.settings.idempotent else None)
         agent = Agent(llm, build_registry(w.gateway, ctx), self.system,
                       max_steps=min(w.settings.max_agent_steps, left),
                       on_event=lambda ev: w.store.audit("agent", ev["type"], f"{self.name}:{ev['run_id']}",
@@ -160,7 +160,9 @@ class Department:
         w.stats["llm_calls"] += llm.calls
         service = llm.elapsed + TOOL_SECONDS * llm.calls + w.chaos.dept_latency.get(self.name, 0.0)
         if res.status != "done":
-            return Reply(False, error=f"agent stopped: {res.status}", calls=llm.calls, service=service)
+            why = (f"budget exhausted: the task's model calls ran out mid-step" if res.status == "max_steps" and left < w.settings.max_agent_steps
+                   else f"agent stopped: {res.status}")
+            return Reply(False, error=why, calls=llm.calls, service=service)
         try:
             payload = json.loads(res.final["args"]["result"])
         except json.JSONDecodeError:

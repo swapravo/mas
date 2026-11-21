@@ -131,3 +131,28 @@ def test_same_seed_same_numbers():
         w, c = make(llm_latency={"finance": 3.0})
         return run(w, c, "finance", "vote").service
     assert once() == once()
+
+
+def test_a_crash_after_the_side_effect_does_not_repeat_it(monkeypatch):
+    """The waiver commits, then the model call that would report it fails. The retry must not waive again."""
+    from harness import LLMUnavailable
+    from enterprise.llm import observations
+    w, c = make()
+    real, boom = w.depts["finance"].policy, {"left": 1}
+
+    def flaky(kind):
+        inner = real(kind)
+
+        def policy(system, messages):
+            if observations(messages) and boom["left"]:          # the tool already ran
+                boom["left"] -= 1
+                raise LLMUnavailable("crashed after the waiver")
+            return inner(system, messages)
+        return policy
+    monkeypatch.setattr(w.depts["finance"], "policy", flaky)
+    assert not run(w, c, "finance", "act", amount=1500).ok
+    assert len(w.store.scan("owner", "waiver_applied")) == 1       # it did happen once
+    again = run(w, c, "finance", "act", amount=1500)
+    assert again.ok and again.payload["applied"]
+    assert len(w.store.scan("owner", "waiver_applied")) == 1
+    assert w.store.get("owner", "ledger", c.resident_id, dept="finance")["waived_total"] == 1500

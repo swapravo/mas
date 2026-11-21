@@ -25,6 +25,7 @@ class World:
         self.store = store or MemoryStore(rls=self.defences.rls)
         self.kv = kv or MemoryKV()
         self.stats: Counter = Counter()
+        self._rngs: dict[str, random.Random] = {}
         self.clock = lambda: 0.0                 # sim.py replaces this with the virtual clock
         self.gateway = Gateway(self.store, self.defences)
         collections_dept.register(self.gateway)
@@ -36,8 +37,10 @@ class World:
                                           finance.Finance(self), legal.Legal(self))}
 
     def rng(self, name: str) -> random.Random:
-        """A separate seeded random stream per component, so adding one never shifts another."""
-        return random.Random(f"{self.settings.seed}:{name}")
+        """One seeded random stream per component (created once), so adding a component never shifts another's numbers."""
+        if name not in self._rngs:
+            self._rngs[name] = random.Random(f"{self.settings.seed}:{name}")
+        return self._rngs[name]
 
     # -- agent-to-agent calls --------------------------------------------------------
     def _register_ask(self) -> None:

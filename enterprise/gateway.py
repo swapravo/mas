@@ -33,6 +33,7 @@ class CallContext:
     """Who is calling, and for whom. Built from the incoming envelope, so on_behalf_of travels with the work."""
     role: str                 # the department whose agent is calling
     env: Envelope             # the handoff being worked on
+    idem: str | None = None   # idempotency key of this step (None when idempotency is switched off)
     @property
     def on_behalf_of(self) -> str:
         return self.env.on_behalf_of
@@ -46,6 +47,20 @@ class ToolSpec:
     description: str
     parameters: dict[str, Any]
     scope_arg: str | None = None           # which argument names the resident this call touches
+
+
+def once(db, ctx: CallContext, effect: Callable[[], Any]) -> Any:
+    """Run a side effect at most once per step key, even if the agent crashes and the step is retried.
+
+    The effect and its key must commit together (one database transaction in Postgres). This is the same idea as
+    message_draft.idempotency_key UNIQUE in schema.sql: the WRITE is idempotent, not just the handler around it.
+    """
+    if ctx.idem and (seen := db.get("effect", ctx.idem)) is not None:
+        return seen
+    result = effect()
+    if ctx.idem:
+        db.put("effect", ctx.idem, result)
+    return result
 
 
 class Bound:

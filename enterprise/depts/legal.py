@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from harness import ToolError
 from enterprise.depts.base import Department, Policy, first_result, make_policy
-from enterprise.gateway import Gateway, ToolSpec
+from enterprise.gateway import Gateway, ToolSpec, once
 
 OBJ = {"type": "object"}
 RES = {**OBJ, "properties": {"resident_id": {"type": "string"}}, "required": ["resident_id"]}
@@ -22,13 +22,15 @@ def get_legal_notes(db, ctx, resident_id: str):
 
 
 def serve_notice(db, ctx, resident_id: str, case_id: str):
-    cur = db.get("notice", resident_id) or {"live": False}
-    if cur["live"]:                                    # a second notice while one is live is wrong
-        return {"served": False, "reason": "a notice is already live"}
-    n = 1 + len([r for r in db.scan("notice_letter") if r["key"].startswith(f"{case_id}:")])
-    db.put("notice_letter", f"{case_id}:{n}", {"case_id": case_id, "resident_id": resident_id})
-    db.put("notice", resident_id, {"live": True, "served_for": case_id})
-    return {"served": True, "n": n}
+    def effect():
+        cur = db.get("notice", resident_id) or {"live": False}
+        if cur["live"]:                                # a second notice while one is live is wrong
+            return {"served": False, "reason": "a notice is already live"}
+        n = 1 + len([r for r in db.scan("notice_letter") if r["key"].startswith(f"{case_id}:")])
+        db.put("notice_letter", f"{case_id}:{n}", {"case_id": case_id, "resident_id": resident_id})
+        db.put("notice", resident_id, {"live": True, "served_for": case_id})
+        return {"served": True, "n": n}
+    return once(db, ctx, effect)
 
 
 def register(gw: Gateway) -> None:

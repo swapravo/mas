@@ -35,8 +35,9 @@ def summarize(sw) -> dict:
     delays = [r["noticed_at"] - r["started"] for r in rows if r["noticed_at"] is not None]
     waivers, letters = w.store.scan("owner", "waiver_applied"), w.store.scan("owner", "notice_letter")
 
-    def doubled(rs):
-        c = Counter(r["payload"]["case_id"] for r in rs)
+    def doubled(rs, step):
+        """Cases where the SAME decision step ran twice (a duplicate that got through). An injected waiver is a leak, not this."""
+        c = Counter(r["payload"]["case_id"] for r in rs if r["payload"].get("step", step).endswith(step))
         return sum(1 for n in c.values() if n > 1)
 
     leaked = incidents(w, waivers)
@@ -47,12 +48,15 @@ def summarize(sw) -> dict:
         "completion_seconds": {"p50": percentile(times, 50), "p95": percentile(times, 95),
                                "max": round(max(times), 2) if times else None},
         "outcomes": {"completed": len(done), "escalated_failure": len(failed), "stalled": len(stuck)},
-        "noticed": {"by": dict(sorted(noticed.items())), "first_notice_after_seconds": round(min(delays), 2) if delays else None},
+        "noticed": {"by": dict(sorted(noticed.items())),
+                    "first_notice_after_seconds": round(min(delays), 2) if delays else None,
+                    "last_notice_after_seconds": round(max(delays), 2) if delays else None},
         "decisions": {"outcome": dict(Counter(r.get("outcome") for r in done)),
                       "decided_by": dict(Counter(r.get("decided_by") for r in done)),
                       "policy_blocked": w.stats["policy_blocked"]},
         "duplicates": {"injected": w.stats["dup_injected"], "suppressed": w.stats["dup_suppressed"],
-                       "cases_with_double_waiver": doubled(waivers), "cases_with_double_notice": doubled(letters)},
+                       "cases_with_double_waiver": doubled(waivers, ":act.waive"),
+                       "cases_with_double_notice": doubled(letters, ":act.refuse")},
         "effects": {"waivers": len(waivers), "notices": len(letters)},
         "leaked": {"count": len(leaked), "by_layer": dict(Counter(leaked.values())),
                    "attempts_blocked": len(w.gateway.blocked)},

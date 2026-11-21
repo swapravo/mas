@@ -84,6 +84,9 @@ class Orchestrator:
         if task is None or task["status"] not in ("running", "awaiting_human"):
             return
         if env.step == "human.decision":                      # a person answered a decision card
+            if task["status"] != "awaiting_human":            # a duplicate answer: the case has already moved on
+                self.w.stats["dup_results_ignored"] += 1
+                return
             task["decision"].update(env.payload["result"])
             task.update(status="running", stage=task["stage"] + 1)
             return self.advance(task, env)

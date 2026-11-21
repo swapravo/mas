@@ -13,9 +13,13 @@ from enterprise.metrics import summarize
 from enterprise.orchestrators import Central, Customer, Risk, Top
 from enterprise.registry import Registry
 from enterprise.settings import Chaos, Defences, Settings
+from enterprise.watchdog import Watchdog
 from enterprise.sim import Net, Result, Sim
 from enterprise.workload import make_cases, seed_store
 from enterprise.world import World
+
+
+KILLABLE = ("orchestrator", "top", "customer", "risk", "bus", *DEPT_NAMES)
 
 
 class Simulation:
@@ -35,6 +39,9 @@ class Simulation:
         self._seq = 0
         self.orchestrators = []
         self._build_mode()
+        unknown = set(self.w.chaos.kill) - set(KILLABLE)
+        if unknown:
+            raise ValueError(f"cannot kill {sorted(unknown)}; choose from {KILLABLE}")
 
     def next_seq(self) -> int:
         self._seq += 1
@@ -133,7 +140,8 @@ class Simulation:
 
     # -- run ---------------------------------------------------------------------------
     def run(self) -> dict:
-        ch = self.w.chaos
+        if self.settings.watchdog_on():
+            Watchdog(self).start()
         for c in self.cases:
             self.sim.at(c.arrival, self.start_case, c)
         self.sim.run(self.settings.horizon)

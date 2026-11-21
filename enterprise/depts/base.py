@@ -126,7 +126,7 @@ class Department:
         if w.settings.idempotent:
             if not w.kv.setnx(idem, "pending"):
                 saved = w.kv.get(idem)
-                w.stats["dup_suppressed"] += 1
+                w.stats["ask_from_cache" if kind == "ask" else "dup_suppressed"] += 1     # an ask is not a duplicate message
                 w.store.audit("system", "duplicate_suppressed", f"{self.name}:{env.key()}")
                 return Reply(True, json.loads(saved) if saved and saved != "pending" else {}, cached=True, service=0.01)
         try:

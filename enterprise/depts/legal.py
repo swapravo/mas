@@ -27,7 +27,7 @@ def serve_notice(db, ctx, resident_id: str, case_id: str):
         if cur["live"]:                                # a second notice while one is live is wrong
             return {"served": False, "reason": "a notice is already live"}
         n = 1 + len([r for r in db.scan("notice_letter") if r["key"].startswith(f"{case_id}:")])
-        db.put("notice_letter", f"{case_id}:{n}", {"case_id": case_id, "resident_id": resident_id})
+        db.put("notice_letter", f"{case_id}:{n}", {"case_id": case_id, "resident_id": resident_id, "step": ctx.env.key()})
         db.put("notice", resident_id, {"live": True, "served_for": case_id})
         return {"served": True, "n": n}
     return once(db, ctx, effect)

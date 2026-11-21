@@ -51,3 +51,8 @@ class RedisKV:
 
     def incr(self, key: str, n: int = 1) -> int:
         return int(self.r.incrby(self.p + key, n))
+
+    def clear(self) -> None:
+        """Forget every key this class wrote (its prefix), so a run starts clean."""
+        for k in self.r.scan_iter(match=self.p + "*"):
+            self.r.delete(k)

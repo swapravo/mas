@@ -3,13 +3,7 @@ from __future__ import annotations
 
 from collections import Counter
 
-
-def percentile(values: list[float], p: float) -> float | None:
-    """Nearest-rank percentile. Deterministic, no interpolation."""
-    if not values:
-        return None
-    v = sorted(values)
-    return round(v[max(0, min(len(v) - 1, -(-int(p * len(v) * 1000) // 100000) - 1))], 2)
+from enterprise.metrics_util import percentile
 
 
 def incidents(w, waivers: list[dict]) -> dict:
@@ -62,6 +56,7 @@ def summarize(sw) -> dict:
         "effects": {"waivers": len(waivers), "notices": len(letters)},
         "leaked": {"count": len(leaked), "by_layer": dict(Counter(leaked.values())),
                    "attempts_blocked": len(w.gateway.blocked)},
+        "approvals": sw.approvals.stats(),
         "faults": {"retries": w.stats["retries"], "escalations": w.stats["escalations"], "rejected_handoffs": w.stats["rejected"],
                    "lost_bus_down": w.stats["lost_bus_down"], "dead_letters": w.stats["dead_letters"],
                    "budget_rejects": w.stats["budget_rejects"], "llm_failures": w.stats["llm_failures"]},

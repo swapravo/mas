@@ -72,7 +72,7 @@ class Choreography:
                 r = self.work(dept, env, "reply", {**ids, "outcome": outcome, "amount": p["amount"]})
                 if not r.ok:
                     return Result(r.service, [], ok=False)
-                self.sw.complete(p["case_id"], {"outcome": outcome, **self.sw.decisions[p["case_id"]]})
+                self.sw.complete(p["case_id"], {**self.sw.decisions[p["case_id"]], "outcome": outcome})
                 return Result(r.service, [self.event(env, dept, "case.closed", {**ids, "outcome": outcome})])
         elif t == "case.briefed":                                              # ops / finance / legal vote
             r = self.work(dept, env, f"vote.{dept}", p)                          # p carries the resident's text

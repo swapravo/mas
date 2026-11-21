@@ -33,6 +33,12 @@ class Registry:
         if row and row["status"] not in TERMINAL:
             self.store.put("orch", KIND, case_id, {**row, **fields})
 
+    def annotate(self, case_id: str, **fields) -> None:
+        """Add facts to a case at any time, even after it is finished (e.g. the reply was approved later)."""
+        row = self.get(case_id)
+        if row:
+            self.store.put("orch", KIND, case_id, {**row, **fields})
+
     def finish(self, case_id: str, status: str, **fields) -> None:
         row = self.get(case_id)
         if row and row["status"] not in TERMINAL:

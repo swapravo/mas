@@ -42,8 +42,15 @@ class MemoryStore:
         self._rows[(dept, kind, key)] = copy.deepcopy(payload)
 
     def get(self, role: str, kind: str, key: str, dept: str | None = None) -> dict | None:
-        rows = [r for r in self.scan(role, kind, dept) if r["key"] == key]
-        return rows[0]["payload"] if rows else None
+        dept = dept if dept is not None else (None if role == "owner" else role)
+        if dept is None:                                   # owner, any department: look through them all
+            rows = [r for r in self.scan(role, kind) if r["key"] == key]
+            return rows[0]["payload"] if rows else None
+        if not self._sees(role, dept) or (dept, kind, key) not in self._rows:
+            return None                                    # row-level security: a hidden row simply is not there
+        if role != "owner" and dept != role:
+            self.leaks.append({"layer": "rls", "role": role, "kind": kind, "key": key, "row_dept": dept})
+        return copy.deepcopy(self._rows[(dept, kind, key)])
 
     def scan(self, role: str, kind: str, dept: str | None = None) -> list[dict]:
         """Rows of `kind` this role may see. `dept` narrows to one department (default: your own)."""

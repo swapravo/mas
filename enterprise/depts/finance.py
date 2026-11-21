@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from harness import ToolError
-from enterprise.depts.base import Department, Policy, first_result, make_policy
+from enterprise.depts.base import Department, Policy, answer, first_result, make_policy
 from enterprise.gateway import Gateway, ToolSpec, once
 
 OBJ = {"type": "object"}
@@ -29,7 +29,8 @@ def make_apply_waiver(limit: int):
         def effect():
             n = 1 + len([r for r in db.scan("waiver_applied") if r["key"].startswith(f"{case_id}:")])
             db.put("waiver_applied", f"{case_id}:{n}", {"case_id": case_id, "resident_id": resident_id,
-                                                        "amount": amount, "approved_by": approved_by})
+                                                        "amount": amount, "approved_by": approved_by,
+                                                        "step": ctx.env.key()})      # which step made it
             db.put("ledger", resident_id, {**row, "waived_total": row.get("waived_total", 0) + amount})
             return {"waived": amount, "n": n}
         return once(db, ctx, effect)
@@ -76,5 +77,5 @@ class Finance(Department):
                                                          "detail": o[0].get("result") if o else None}),
             # a naive helper: it looks up whatever it is asked for
             "ask": make_policy(lambda t: [("finance.get_ledger", {"resident_id": t["resident_id"]})],
-                               lambda t, o: {"data": first_result(o)}),
+                               lambda t, o: answer(o)),
         }[kind]

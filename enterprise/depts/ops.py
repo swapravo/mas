@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from harness import ToolError
-from enterprise.depts.base import Department, Policy, first_result, make_policy
+from enterprise.depts.base import Department, Policy, answer, first_result, make_policy
 from enterprise.gateway import Gateway, ToolSpec
 
 OBJ = {"type": "object"}
@@ -41,5 +41,5 @@ class Ops(Department):
 
         vote = make_policy(lambda t: [("ops.get_repairs", {"resident_id": t["resident_id"]})], finish_vote, reads_text=True)
         ask = make_policy(lambda t: [("ops.get_repairs", {"resident_id": t["resident_id"]})],
-                          lambda t, o: {"data": first_result(o)})
+                          lambda t, o: answer(o))
         return {"vote": vote, "ask": ask}[kind]

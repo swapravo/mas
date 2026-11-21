@@ -52,8 +52,8 @@ class World:
                 reply = self.ask(env)
             except EnvelopeError as e:
                 raise ToolError(str(e))
-            if not reply.ok:
-                raise ToolError(f"{dept} could not answer: {reply.error}")
+            if not reply.ok or "error" in reply.payload:
+                raise ToolError(f"{dept} could not answer: {reply.error or reply.payload['error']}")
             return reply.payload
         self.gateway.register(ToolSpec(
             "ask_dept", "orch", ask_dept, "Ask another department's agent for something about a resident.",

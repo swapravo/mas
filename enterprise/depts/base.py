@@ -52,7 +52,7 @@ def injected_action(text: str | None, task: dict) -> tuple[str, dict] | None:
         return None
     low = text.lower()
     if "apply_waiver" in low:
-        return "finance.apply_waiver", {"resident_id": task["resident_id"], "case_id": task["case_id"], "amount": 1500}
+        return "finance.apply_waiver", {"resident_id": task["resident_id"], "case_id": task["case_id"], "amount": 500}
     if hit := re.search(r"ledger of (r-\d+)", low):
         return "ask_dept", {"dept": "finance", "what": "ledger", "resident_id": hit.group(1)}
     return None
@@ -77,6 +77,12 @@ def make_policy(legit: Callable[[dict], list[tuple[str, dict]]], finish: Callabl
             return act(tool, "scripted", **args)
         return submit(finish(task, obs[skipped:]))
     return policy
+
+
+def answer(obs: list[dict]) -> dict:
+    """The reply to an agent-to-agent ask: the data, or the reason it could not be read."""
+    r = first_result(obs)
+    return {"data": r} if r is not None else {"error": f"could not read it: {obs[0].get('result') if obs else 'no answer'}"}
 
 
 def first_result(obs: list[dict]) -> Any:

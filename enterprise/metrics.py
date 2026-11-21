@@ -12,6 +12,24 @@ def percentile(values: list[float], p: float) -> float | None:
     return round(v[max(0, min(len(v) - 1, -(-int(p * len(v) * 1000) // 100000) - 1))], 2)
 
 
+def incidents(w, waivers: list[dict]) -> dict:
+    """Distinct leak incidents -> the layer that should have stopped them.
+
+    Three sources, de-duplicated: a check was off and the call went through (gateway/obo); a role was handed another
+    department's row (rls); a waiver exists that no decision asked for (effect). The last one needs no switch to be off:
+    it is how an injected instruction that reaches Finance's own tool shows up even with every layer on.
+    """
+    out: dict[tuple, str] = {}
+    for g in w.gateway.leaks:
+        out[(g["task"], "waiver") if g["tool"] == "finance.apply_waiver" else (g["task"], g["tool"], g["layer"])] = g["layer"]
+    for r in w.store.leaks:
+        out[(r["role"], r["kind"], r["key"])] = "rls"
+    for r in waivers:
+        if not r["payload"].get("step", "").endswith(":act.waive"):
+            out.setdefault((r["payload"]["case_id"], "waiver"), "effect")
+    return out
+
+
 def summarize(sw) -> dict:
     s, w = sw.settings, sw.w
     rows = sorted(sw.registry.all(), key=lambda r: r["case_id"])
@@ -27,7 +45,7 @@ def summarize(sw) -> dict:
         c = Counter(r["payload"]["case_id"] for r in rs)
         return sum(1 for n in c.values() if n > 1)
 
-    leaks = [*w.gateway.leaks, *w.store.leaks]
+    leaked = incidents(w, waivers)
     return {
         "mode": s.mode, "strategy": s.strategy, "seed": s.seed, "cases": len(rows),
         "messages": sw.net.sent,
@@ -42,7 +60,7 @@ def summarize(sw) -> dict:
         "duplicates": {"injected": w.stats["dup_injected"], "suppressed": w.stats["dup_suppressed"],
                        "cases_with_double_waiver": doubled(waivers), "cases_with_double_notice": doubled(letters)},
         "effects": {"waivers": len(waivers), "notices": len(letters)},
-        "leaked": {"count": len(leaks), "by_layer": dict(Counter(x["layer"] for x in leaks)),
+        "leaked": {"count": len(leaked), "by_layer": dict(Counter(leaked.values())),
                    "attempts_blocked": len(w.gateway.blocked)},
         "faults": {"retries": w.stats["retries"], "escalations": w.stats["escalations"], "rejected_handoffs": w.stats["rejected"],
                    "lost_bus_down": w.stats["lost_bus_down"], "dead_letters": w.stats["dead_letters"],

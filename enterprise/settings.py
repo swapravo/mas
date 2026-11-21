@@ -70,6 +70,7 @@ class Settings:
     # transport
     net_latency: float = 0.05        # seconds per bus hop
     redeliver_after: float = 10.0    # choreography: un-acked event is delivered again after this long
+    events_carry_text: bool = True   # choreography: the brief event includes the resident's text (see choreography.py)
 
     # limits enforced in code
     step_timeout: float = 20.0       # an orchestrator waits this long for one step...

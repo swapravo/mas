@@ -57,8 +57,10 @@ class Choreography:
                 r = self.work(dept, env, "intake", ids)
                 if not r.ok:
                     return Result(r.service, [], ok=False)
-                return Result(r.service, [self.event(env, dept, "case.briefed", {**ids, "fee_id": r.payload["fee_id"],
-                                                                                 "text": r.payload["text"]})])
+                brief = {**ids, "fee_id": r.payload["fee_id"]}
+                if self.w.settings.events_carry_text:             # off = data minimisation on the bus
+                    brief["text"] = r.payload["text"]
+                return Result(r.service, [self.event(env, dept, "case.briefed", brief)])
             if t == "vote.cast":
                 return self.join(env, ids)
             if t == "action.done":

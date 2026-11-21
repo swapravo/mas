@@ -114,6 +114,6 @@ class Gateway:
 
         result = spec.fn(Bound(self.store, spec.owner), ctx, **args)
         for layer, reason in violations:       # only reached if that layer was off
-            self.leaks.append({**who, "layer": layer, "reason": reason})
+            self.leaks.append({**who, "layer": layer, "reason": reason, "result": result})
         self.store.audit("agent", "tool_call", name, {**who, "leak": [v[0] for v in violations]})
         return result
